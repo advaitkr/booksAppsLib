@@ -28,3 +28,25 @@ exports.getBookDetails = async (req, res) => {
 
   res.json({ book, averageRating, totalReviews: reviews.length });
 };
+exports.searchBooks = async (req, res) => {
+    try {
+      const { query } = req.query;
+  
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+  
+      const regex = new RegExp(query, "i"); // case-insensitive
+      const books = await Book.find({
+        $or: [
+          { title: { $regex: regex } },
+          { author: { $regex: regex } },
+        ],
+      });
+  
+      res.status(200).json({ count: books.length, books });
+    } catch (error) {
+      res.status(500).json({ message: "Server Error", error: error.message });
+    }
+  };
+  
